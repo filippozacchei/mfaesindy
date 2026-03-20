@@ -13,6 +13,7 @@ authors = [
   { name = "Filippo Zacchei" }
 ]
 dependencies = [
+  "matplotlib>=3.8",
   "numpy>=1.26,<2",
   "pydantic>=2.6",
   "pysindy>=1.7",
