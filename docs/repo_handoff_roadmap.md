@@ -63,6 +63,21 @@ The right next scientific step is not "add many losses". The right next step is:
 
 That is the structure that will make the method convincing.
 
+## Methodology Decisions Already Fixed
+
+The discussion has already narrowed the design space substantially. The current working assumptions are:
+
+- [x] Final application: low-fidelity CFD aerosol trajectories and high-fidelity experimental trajectories.
+- [x] High-dimensional observations on both fidelities require an autoencoder-style reduced-order model.
+- [x] A subset of LF-HF runs can be treated as paired under matched operating conditions.
+- [x] The latent representation should be principally shared, with room for optional private fidelity-specific components.
+- [x] The latent state should be informed by operating parameters and initial-condition descriptors.
+- [x] The main latent forecasting backbone should be shared-core SINDy with MFMC-style multifidelity regression.
+- [x] HF-specific residual dynamics or decoder correction are allowed as controlled extensions if the shared backbone is insufficient.
+- [x] A two-step LF-surrogate-plus-HF-correction model remains a required baseline.
+
+What is still open is not the overall methodology, but the exact implementation choices and the experimental protocol.
+
 ## Phase 0: Freeze the Project Story
 
 - [ ] Decide the primary identity of the repo.
@@ -202,23 +217,26 @@ This phase is essential because the repo currently spans at least two methodolog
 - latent Neural ODE shared-dynamics modeling;
 - planned shared-latent autoencoder + sparse dynamics / SINDy-style identification.
 
-- [ ] Decide the paper claim precisely.
-  - Is the paper about multi-fidelity latent forecasting?
-  - Is it about interpretable latent dynamics identification?
-  - Is it about both, with one as the main claim and one as an extension?
+- [x] Fix the main scientific direction.
+  - primary story: multi-fidelity latent reduced-order modeling for HF prediction;
+  - core mechanism: shared latent backbone with MFMC-SINDy on paired LF-HF data;
+  - secondary extension: HF residual dynamics or decoder correction;
+  - Neural ODE: optional refinement or comparison, not the first backbone.
+- [ ] Convert the chosen backbone into one concise formal statement for the paper and the README.
 - [ ] Define the mathematical objects once and reuse them consistently.
   - observations;
   - parameters;
   - fidelities;
   - paired groups;
-  - latent states;
-  - latent dynamics;
+  - shared latent core and optional private latent block;
+  - latent dynamics and HF correction terms;
   - mismatch terms.
 - [ ] Separate assumptions from design choices.
-  - assumption: shared underlying dynamics;
-  - design choice: partially shared encoder/decoder weights;
-  - design choice: discrepancy decoder;
-  - design choice: SINDy or Neural ODE latent dynamics.
+  - assumption: CFD and experiment share a dominant latent dynamical backbone;
+  - assumption: a paired subset exists and is statistically meaningful;
+  - design choice: principally shared encoder/decoder weights;
+  - design choice: optional private latent coordinates;
+  - design choice: MFMC-SINDy shared core with optional HF residual correction.
 - [ ] State clearly which losses are scientifically motivated and which are engineering stabilizers.
 - [ ] Add a methodology figure that matches the exact implementation/paper scope.
 - [ ] Add a table named `Implemented now vs planned extension`.
@@ -259,10 +277,10 @@ This is the most important technical next step for the research extension.
 
 ### 5.3 Choose the first implementation target
 
-- [ ] Start with one simple mismatch term first.
-  - recommendation: paired latent rollout mismatch on matched times.
+- [x] Start with one simple mismatch term first.
+  - chosen first target: paired latent rollout mismatch on matched times for the shared latent core.
 - [ ] Add one optional stronger term later.
-  - recommendation: dynamics mismatch or HF correction mismatch.
+  - recommendation: HF latent residual dynamics mismatch or HF decoder correction mismatch.
 - [ ] Do not add more than two new terms before the first ablation study.
 
 Deliverable:
@@ -302,34 +320,75 @@ Deliverable:
 
 - a weighting scheme that is interpretable, monitorable, and ablatable.
 
-## Phase 7: Decide the Dynamics Model Scope
+## Phase 7: Lock the Dynamics Model Scope
 
-Before comparing against baselines, we need to lock the dynamics model used in the paper.
+Before implementation expands further, we need to freeze the first model we will actually build and test.
 
-- [ ] Decide whether the first paper version uses:
-  - shared latent Neural ODE;
-  - shared latent discrete-time propagator;
-  - shared latent SINDy;
-  - or a hybrid where Neural ODE is predictive and SINDy is interpretive.
-- [ ] If SINDy is introduced, define the exact role.
-  - primary dynamics model;
-  - auxiliary regularizer;
-  - post hoc analysis layer;
-  - or sparse correction on top of shared dynamics.
-- [ ] Decide whether HF-specific correction is needed.
-  - shared dynamics only;
-  - shared dynamics plus sparse HF residual;
-  - shared latent coordinates plus fidelity-specific observation maps only.
+- [x] First backbone:
+  - principally shared autoencoder;
+  - parameter/IC-informed latent encoding;
+  - shared latent core with optional private fidelity-specific block;
+  - shared latent SINDy estimated with MFMC on paired LF-HF data.
+- [x] Neural ODE is not the first main model.
+  - it stays as a later refinement or comparison.
+- [ ] Define whether the first release uses:
+  - shared core only;
+  - shared core plus HF decoder correction;
+  - shared core plus HF latent residual dynamics.
+- [ ] Decide whether the HF correction is sparse first or neural first.
 - [ ] Keep the first research paper simpler than the maximal design space.
 
 Recommendation:
 
-- For the first defensible paper, keep one shared latent dynamics model and one clearly defined mismatch mechanism.
-- Treat HF-specific correction as an ablation or extension unless results prove it is essential.
+- For the first defensible paper, build the shared MFMC-SINDy core first.
+- Treat HF correction as the first extension and Neural ODE refinement as the second extension.
 
 Deliverable:
 
 - a frozen model scope for the paper experiments.
+
+## Phase 7A: Immediate Technical Next Steps
+
+These are now the most useful concrete tasks.
+
+- [ ] Decide whether the default latent architecture is:
+  - fully shared latent state;
+  - or shared latent core plus private fidelity-specific coordinates.
+- [ ] Define the parameter and initial-condition inputs that will condition the encoder and latent dynamics.
+  - list the exact fields expected from CFD;
+  - list the exact fields expected from experiments;
+  - identify which fields are paired and which may be noisy or incomplete.
+- [ ] Define the paired-data contract in code and docs.
+  - what counts as one LF-HF pair;
+  - what metadata identify matched operating conditions;
+  - how matched times are represented or interpolated.
+- [ ] Define the first latent SINDy library.
+  - polynomial order;
+  - parameter dependence;
+  - whether cross terms with conditioning variables are included.
+- [ ] Define the first latent derivative estimator.
+  - finite differences;
+  - spline smoothing;
+  - or another robust estimator for noisy HF experimental data.
+- [ ] Write the MFMC-SINDy estimator in mathematical detail.
+  - target HF moments;
+  - LF baseline estimator;
+  - paired correction term;
+  - control-variate coefficient estimation;
+  - regularized sparse solve.
+- [ ] Decide whether the first HF correction is:
+  - no correction;
+  - decoder correction;
+  - or latent residual dynamics correction.
+- [ ] Build the minimum baseline set.
+  - HF-only latent surrogate;
+  - two-step LF-surrogate-plus-HF-correction baseline;
+  - shared latent model without alignment;
+  - shared latent model with alignment but without MFMC correction.
+
+Deliverable:
+
+- one precise first implementation target that can be coded without further methodological branching.
 
 ## Phase 8: Baseline Plan
 
@@ -450,11 +509,11 @@ We should not do the tasks in arbitrary order. The most efficient order is:
 
 1. freeze project identity and naming;
 2. clean the repo structure;
-3. rewrite README and docs skeleton;
-4. redesign minimal examples and tutorial notebooks;
-5. formalize mismatch and weighted objectives;
-6. lock the paper model scope;
-7. define the baseline matrix;
+3. migrate the agreed methodology into the main docs and paper notes;
+4. define the paired-data schema, latent decomposition, and conditioning inputs;
+5. formalize mismatch and the MFMC-SINDy estimator;
+6. build the minimum baseline matrix;
+7. redesign minimal examples and tutorial notebooks around the chosen backbone;
 8. run ablations and comparisons;
 9. write the paper around the finalized evidence.
 
@@ -462,13 +521,14 @@ We should not do the tasks in arbitrary order. The most efficient order is:
 
 In the next pass, I recommend we do only the following:
 
-- choose the official repo name and scope;
-- decide what happens to `mf_lnode` versus `mfaesindy`;
-- decide whether `docs/methodology.md` is "implemented method" or "paper roadmap";
-- outline the new `README.md`;
-- define the first mismatch term and the first baseline suite.
+- migrate [docs/methodology_shared_latent.md](/Users/filippozacchei/Library/CloudStorage/OneDrive-PolitecnicodiMilano/Documenti/Projects/2026_MFSINDY2/mfaesindy/docs/methodology_shared_latent.md:1) into the main methodology path;
+- decide whether the default model has a private latent block or keeps only a shared core;
+- define the paired CFD/experiment metadata contract;
+- define the first SINDy library and latent derivative estimator;
+- specify the exact MFMC regression moments and control-variate estimator;
+- pin down the first baseline suite and evaluation metrics.
 
-That will remove most of the current ambiguity.
+That will turn the methodology into an implementable research plan.
 
 ## References To Keep In Mind
 
