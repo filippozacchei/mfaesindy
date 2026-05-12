@@ -3,7 +3,7 @@ requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mfl_rom"
+name = "mfl-rom"
 version = "0.1.0"
 description = "Surrogate modeling for high dimensional dynamic system"
 authors = [
@@ -17,7 +17,7 @@ dependencies = [
     "torch",
 ]
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.11"
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
@@ -36,3 +36,7 @@ dev = [
     "mypy",
     "jupyter",
 ]
+
+[tool.setuptools]
+packages = ["mfl_rom"]
+package-dir = {"" = "src"}
