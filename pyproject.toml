@@ -26,8 +26,8 @@ license = "MIT"
 license-files = ["LICEN[CS]E*"]
 
 [project.urls]
-Homepage = "https://github.com/filippozacchei/mfaesindy"
-Issues = "https://github.com/filippozacchei/mfaesindy/issues"
+Homepage = "https://github.com/filippozacchei/mfl-rom"
+Issues = "https://github.com/filippozacchei/mfl-rom/issues"
 
 [project.optional-dependencies]
 dev = [
