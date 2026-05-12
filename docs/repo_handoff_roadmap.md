@@ -171,20 +171,28 @@ Deliverable:
 
 ## Phase 3: Redesign the Examples and Notebooks
 
-The current examples are rich, but they are too long and too presentation-oriented to be the best teaching entry points.
+The current examples are rich, but they are too long and too presentation-oriented to be the best teaching entry points. They also reflect the older latent-Neural-ODE-first story rather than the newly chosen shared-latent MFMC-SINDy backbone.
 
-- [ ] Keep the current long scripts as full demo pipelines only if they are clearly labeled as such.
-- [ ] Create one minimal example per use case.
-  - `examples/minimal_synthetic.py`
-  - `examples/minimal_cfd_like.py`
-- [ ] Create one "full experiment" example per use case.
-  - these can keep the plotting and artifact generation.
+- [ ] Reclassify the existing examples.
+  - `examples/train_synthetic.py` should become a legacy or baseline example unless it is rewritten around the new backbone.
+  - `examples/train_cfd_like_grids.py` should become either a legacy example or the seed for the new paired multi-fidelity example.
+- [ ] Create one minimal methodology-aligned example.
+  - target: `examples/minimal_shared_latent_sindy.py`
+  - purpose: show paired LF-HF synthetic data, shared latent encoding, latent SINDy fit, and basic rollout evaluation.
+- [ ] Create one minimal baseline example.
+  - target: `examples/minimal_two_step_baseline.py`
+  - purpose: show the Conti-style logic or a simpler two-step LF-surrogate-plus-HF-correction analogue.
+- [ ] Create one full experiment example for the chosen backbone.
+  - target: `examples/paired_mfmc_sindy_experiment.py`
+  - purpose: run the staged autoencoder -> latent SINDy -> HF correction pipeline with plots and metrics.
+- [ ] Keep only one heavy presentation-style example, and make sure it is explicitly labeled as a report/demo pipeline rather than the main entry point.
 - [ ] Split tutorial notebooks by learning objective.
   - Notebook 1: installation and quickstart
-  - Notebook 2: synthetic dataset generation
-  - Notebook 3: training the shared latent model
-  - Notebook 4: evaluating rollouts and fidelity gaps
-  - Notebook 5: ablations on alignment and weighting
+  - Notebook 2: paired synthetic dataset generation and inspection
+  - Notebook 3: training the shared latent autoencoder
+  - Notebook 4: latent derivative estimation and SINDy library construction
+  - Notebook 5: MFMC-SINDy fitting on paired LF-HF data
+  - Notebook 6: baseline comparison and ablations
 - [ ] Make each notebook readable cell by cell.
   - each code cell should have a markdown cell immediately before it explaining:
     - what the next cell does;
@@ -209,6 +217,36 @@ The current examples are rich, but they are too long and too presentation-orient
 Deliverable:
 
 - tutorials that are genuinely pedagogical, not only demonstrative.
+
+## Phase 3A: Make Examples Validate the Methodology
+
+The examples should not only demonstrate usage. They should verify that the methodology behaves as claimed.
+
+- [ ] Define one canonical synthetic paired benchmark for the new method.
+  - LF should have a controlled nonlinear bias relative to HF.
+  - paired metadata, parameter conditioning, and matched times should all be explicit.
+- [ ] Ensure the minimal shared-latent example reports:
+  - reconstruction error by fidelity;
+  - paired latent alignment error;
+  - latent SINDy regression residual;
+  - rollout error;
+  - fidelity-gap error.
+- [ ] Ensure the minimal two-step baseline reports the same metrics where applicable.
+- [ ] Ensure the full experiment example includes ablations:
+  - without alignment;
+  - with alignment;
+  - with MFMC-SINDy;
+  - with optional HF correction.
+- [ ] Make every example write a compact metrics JSON that can be consumed by tests and by the notebook/report layer.
+- [ ] Add one example that acts as a smoke benchmark for CI-scale validation.
+  - quick runtime;
+  - tiny synthetic paired dataset;
+  - deterministic seed;
+  - no heavy plotting required.
+
+Deliverable:
+
+- examples that double as methodological validation artifacts.
 
 ## Phase 4: Clarify the Methodology for the Paper
 
@@ -390,6 +428,112 @@ Deliverable:
 
 - one precise first implementation target that can be coded without further methodological branching.
 
+## Phase 7B: Implementation Work Packages
+
+The methodology should now be translated into bounded engineering slices.
+
+### 7B.1 Data and configuration layer
+
+- [ ] Extend the data schema so one grouped sample can represent:
+  - LF observations;
+  - HF observations;
+  - pairing metadata;
+  - operating parameters;
+  - initial-condition descriptors;
+  - optional time-alignment metadata.
+- [ ] Extend config objects for:
+  - shared latent core dimension;
+  - optional private latent dimension;
+  - conditioning inputs;
+  - SINDy library settings;
+  - MFMC estimator settings;
+  - HF correction settings.
+
+### 7B.2 Model layer
+
+- [ ] Implement or refactor the encoder/decoder stack so the model can expose:
+  - shared latent core only;
+  - or shared latent core plus private fidelity-specific coordinates.
+- [ ] Expose parameter/IC conditioning consistently across encoder, decoder, and latent dynamics.
+- [ ] Add a clean interface boundary between:
+  - representation learning;
+  - latent dynamics fitting;
+  - HF correction modules.
+
+### 7B.3 Latent-dynamics layer
+
+- [ ] Add a SINDy library builder for the shared latent core.
+- [ ] Add latent derivative estimation utilities robust to noisy HF trajectories.
+- [ ] Add MFMC-style estimators for latent regression moments.
+- [ ] Add sparse solve / thresholding utilities for the shared operator.
+- [ ] Add an optional HF residual correction module.
+
+### 7B.4 Training pipeline
+
+- [ ] Implement the staged training workflow:
+  - stage 1: train shared latent autoencoder;
+  - stage 2: encode trajectories and estimate derivatives;
+  - stage 3: fit shared latent SINDy with MFMC;
+  - stage 4: fit optional HF correction;
+  - stage 5: optional alternating refinement.
+- [ ] Decide what remains inside the current `Trainer` abstraction and what should become a higher-level experiment pipeline.
+
+Deliverable:
+
+- a development plan that maps directly to code modules rather than research slogans.
+
+## Phase 7C: Test Strategy for the New Methodology
+
+The test suite must evolve with the methodology. Current tests mostly cover the existing latent-Neural-ODE library surface. The new backbone needs unit, integration, and example-level validation.
+
+### 7C.1 Update existing tests
+
+- [ ] Extend `tests/test_datasets.py` to validate:
+  - paired LF-HF grouping;
+  - parameter/IC metadata propagation;
+  - matched-time or interpolation behavior.
+- [ ] Extend `tests/test_autoencoder.py` and `tests/test_model.py` to validate:
+  - shared latent core shape;
+  - optional private latent coordinates;
+  - conditioning inputs;
+  - paired latent outputs.
+- [ ] Extend `tests/test_losses.py` to validate:
+  - paired shared-core alignment loss;
+  - latent rollout mismatch loss;
+  - optional HF correction penalties.
+- [ ] Extend `tests/test_configs.py` and `tests/test_public_api.py` to cover the new configuration and public interfaces.
+
+### 7C.2 Add new targeted tests
+
+- [ ] Add `tests/test_sindy_library.py`.
+  - feature generation;
+  - parameter-conditioned library terms;
+  - shape and ordering guarantees.
+- [ ] Add `tests/test_latent_derivatives.py`.
+  - derivative estimation on clean and noisy synthetic trajectories;
+  - basic numerical sanity checks.
+- [ ] Add `tests/test_mfmc_regression.py`.
+  - LF baseline moment estimator;
+  - paired correction term;
+  - control-variate coefficient estimation;
+  - recovery on a toy linear latent system.
+- [ ] Add `tests/test_hf_correction.py` if residual dynamics or decoder correction are introduced.
+- [ ] Add `tests/test_pipeline_shared_latent_sindy.py`.
+  - end-to-end staged pipeline smoke test on a tiny paired synthetic dataset.
+
+### 7C.3 Example and regression tests
+
+- [ ] Add an example smoke test that runs the minimal shared-latent MFMC-SINDy example with a quick flag.
+- [ ] Add an example smoke test for the minimal two-step baseline.
+- [ ] Define tolerances for:
+  - metrics file creation;
+  - non-NaN losses and coefficients;
+  - qualitative improvement over trivial baselines on the toy dataset.
+
+Deliverable:
+
+- a test matrix that validates not only code correctness but also the intended methodological behavior.
+
 ## Phase 8: Baseline Plan
 
 The paper should not compare only against your own variants.
@@ -473,6 +617,9 @@ Deliverable:
   - example: a shared latent space with explicit cross-fidelity mismatch control improves HF prediction under limited HF data.
 - [ ] Write the contributions list conservatively.
 - [ ] Add one method figure, one training-objective figure, and one benchmark figure.
+- [ ] Create a methodology Beamer deck for internal discussions and paper-prep presentations.
+  - target: `paper/methodology_beamer.tex`
+  - keep equations, assumptions, baselines, and plots aligned with the roadmap and methodology notes.
 - [ ] Prepare a notation table.
 - [ ] Add an ablation table focused on what each loss term contributes.
 - [ ] Add a baseline comparison table.
@@ -512,10 +659,12 @@ We should not do the tasks in arbitrary order. The most efficient order is:
 3. migrate the agreed methodology into the main docs and paper notes;
 4. define the paired-data schema, latent decomposition, and conditioning inputs;
 5. formalize mismatch and the MFMC-SINDy estimator;
-6. build the minimum baseline matrix;
-7. redesign minimal examples and tutorial notebooks around the chosen backbone;
-8. run ablations and comparisons;
-9. write the paper around the finalized evidence.
+6. implement the smallest end-to-end staged pipeline;
+7. align the test suite with the new backbone;
+8. build the minimum baseline matrix;
+9. redesign minimal examples and tutorial notebooks around the chosen backbone;
+10. run ablations and comparisons;
+11. write the paper around the finalized evidence.
 
 ## Recommended First Working Session
 
@@ -526,7 +675,9 @@ In the next pass, I recommend we do only the following:
 - define the paired CFD/experiment metadata contract;
 - define the first SINDy library and latent derivative estimator;
 - specify the exact MFMC regression moments and control-variate estimator;
-- pin down the first baseline suite and evaluation metrics.
+- pin down the first baseline suite and evaluation metrics;
+- decide which existing tests will be extended first;
+- decide which minimal example becomes the first end-to-end smoke benchmark.
 
 That will turn the methodology into an implementable research plan.
 
