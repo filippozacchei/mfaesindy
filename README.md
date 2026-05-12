@@ -1,5 +1,20 @@
-# Example Package
+# mfl-rom
 
-This is a simple example package. You can use
-[GitHub-flavored Markdown](https://guides.github.com/features/mastering-markdown/)
-to write your content.
+`mfl-rom` is a Python package for multi-fidelity reduced-order modeling of dynamical systems.
+
+## Installation
+
+```bash
+pip install -e .
+```
+
+## Usage 
+
+``` python
+import mfl_rom
+```
+
+## Status
+
+This package is under active development.
+
