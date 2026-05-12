@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools >= 77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mfl_rom"
+version = "0.1.0"
+description = "Surrogate modeling for high dimensional dynamic system"
+authors = [
+    {name = "Filippo Zacchei", email = "filippo.zacchei97@gmail.com"},
+    {name = "Ana Larranaga", email = "alarra@uw.edu"}
+]
+dependencies = [
+    "numpy",
+    "scipy",
+    "pysindy>=2.1,<2.2",
+    "torch",
+]
+readme = "README.md"
+requires-python = ">=3.14"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+[project.urls]
+Homepage = "https://github.com/filippozacchei/mfaesindy"
+Issues = "https://github.com/filippozacchei/mfaesindy/issues"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "ruff",
+    "mypy",
+    "jupyter",
+]
