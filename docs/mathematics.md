@@ -61,7 +61,7 @@ The reduced-order model is composed of two main components:
 ## Compression
 Because both HF and LF trajectories are high-dimensional, the first layer of the method is an autoencoder-style reduced-order model. Each fidelity is encoded into a latent representation, possibly with a shared core and fidelity-specific private components:
 $$
-E_f\!\left(x^{(f)}_{0:k}, \mu, \eta\right)
+E_f\!\left(\mathbf{u}^{(f)}_{0:k}, \mu, \boldsymbol{\mu}\right)
 \mapsto
 \left(z_s, z_f^{p}\right),
 $$
@@ -73,7 +73,7 @@ where:
 
 The decoder reconstructs observations as
 $$
-\hat x^{(f)} = D_f(z_s, z_f^p, \mu, \eta).
+\hat \mathbf{u}^{(f)} = D_f(z_s, z_f^p; \boldsymbol{\mu}).
 $$  
 This decomposition is useful because the latent space does not need to be fully shared. Forcing the entire latent state to coincide is often too strong. The shared coordinates should represent the common physical evolution, while private coordinates may absorb fidelity-specific sensing effects, missing physics, or experimental artifacts.
 
@@ -81,21 +81,24 @@ This decomposition is useful because the latent space does not need to be fully 
 
 Once a latent representation has been learned, the surrogate advances the latent state in time. Several dynamics models are possible.
 
-### MF Sindy
+### MF SINDy
 
 The shared latent core satisfies
 
 $$
-\dot z_s \approx \Theta(z_s, \mu, \eta)\,\Xi_{\mathrm{shared}},
+\dot z_s \approx \Theta(z_s; \boldsymbol{\mu})\,\Xi_{\mathrm{shared}},
 $$
-where $\Theta$ is a SINDy library and $\Xi_{\mathrm{shared}}$ is a sparse coefficient matrix. This is attractive because, although $\Theta$ is nonlinear in the latent state, the regression is linear in the unknown coefficients. Therefore, multifidelity Monte Carlo or control-variate estimators can be used to estimate the HF regression quantities from abundant LF data and scarce HF data.
+where $\Theta$ is a SINDy library and $\Xi_{\mathrm{shared}}$ is a sparse coefficient matrix.
+
+In the simplest formulation, only the shared latent core $z_s$ is propagated in time. The private latent block $z_f^p$ is treated as a fidelity-specific representation variable inferred from the encoded initial condition and used by the decoder to reconstruct fidelity-dependent effects.
+
+This formulation is attractive because, although $\Theta$ is nonlinear in the latent state, the regression is linear in the unknown coefficients. Therefore, the identification of $\Xi_{\mathrm{shared}}$ can be posed as a multifidelity sparse linear regression problem. The corresponding regression viewpoint, together with its connection to the approximate control-variate framework of Qian et al., is summarized in [multifidelity_linear_regression.md](./multifidelity_linear_regression.md).
 
 This option is especially appealing when:
 - interpretability matters;
 - HF data are scarce;
 - the dominant shared dynamics are expected to be relatively low-order.
 
-### Neural Ode Refinement
+### Neural ODE Refinement
 
 ## Training
-
