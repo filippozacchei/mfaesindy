@@ -1,1 +1,2 @@
-./src/mfl_rom.egg-info/
+*mfl_rom.egg-info*
+*.vscode*
