@@ -1,31 +1,45 @@
 [build-system]
-requires = ["setuptools>=69", "wheel"]
+requires = ["setuptools >= 77.0.3"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "mf-lnode"
+name = "mfl-rom"
 version = "0.1.0"
-description = "Multi-fidelity latent Neural ODE reduced-order modeling from offline trajectory data."
+description = "Surrogate modeling for high dimensional dynamic system"
+authors = [
+    {name = "Filippo Zacchei", email = "filippo.zacchei97@gmail.com"},
+    {name = "Ana Larranaga", email = "alarra@uw.edu"}
+]
+dependencies = [
+    "numpy",
+    "scipy",
+    "pysindy>=2.1",
+    "torch",
+]
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = [
-  "matplotlib>=3.8",
-  "torch>=2.1",
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
 ]
+license = "MIT"
+license-files = ["LICEN[CS]E*"]
+
+[project.urls]
+Homepage = "https://github.com/filippozacchei/mfl-rom"
+Issues = "https://github.com/filippozacchei/mfl-rom/issues"
 
 [project.optional-dependencies]
 dev = [
-  "pytest>=8.0",
-  "tensorboard>=2.16",
-  "torchdiffeq>=0.2.4",
+    "pytest>=8",
+    "ruff",
+    "mypy",
+    "jupyter",
 ]
 
 [tool.setuptools]
+packages = ["mfl_rom"]
 package-dir = {"" = "src"}
 
-[tool.setuptools.packages.find]
-where = ["src"]
-
-[tool.pytest.ini_options]
-pythonpath = ["src"]
-testpaths = ["tests"]
+[tool.ruff]
+line-length = 80
