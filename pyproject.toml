@@ -40,3 +40,6 @@ dev = [
 [tool.setuptools]
 packages = ["mfl_rom"]
 package-dir = {"" = "src"}
+
+[tool.ruff]
+line-length = 80
