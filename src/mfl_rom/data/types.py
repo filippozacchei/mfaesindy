@@ -90,3 +90,17 @@ class Trajectory:
 
     def snapshot(self, index: int) -> State:
         return State(self.states[index], channel_names=self.channel_names)
+
+@dataclass(frozen=True)
+class MFTrajectory:
+    lf_trajectory:  Trajectory
+    hf_trajectory:  Trajectory
+    
+    def __post_init__(self):
+        #check that time and parameters correspond 
+    
+    
+@dataclass
+class TrainingTrajectoryDataset:
+    mf_samples: list[MFTrajectory]
+    lf_samples: list[Trajectory]
