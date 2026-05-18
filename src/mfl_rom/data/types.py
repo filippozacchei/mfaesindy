@@ -1,15 +1,23 @@
+"""
+Core multifidelity data containers.
+
+TODO:
+- Strengthen LF/HF pairing beyond parameter equality, likely with an explicit
+  sample identifier or initial-condition match.
+- Decide whether these containers should be truly immutable or only validated
+  at construction time, since NumPy arrays and stored lists remain mutable.
+- Prevent double-counting when LF/HF trajectories appear both inside paired
+  samples and again in single-fidelity buckets.
+- Consider moving ``TrainingTrajectoryDataset`` out of ``data/types.py`` if the
+  training-data views become more complex.
+- Define a minimal package-root public identity in ``mfl_rom.__init__``.
+"""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 
 import numpy as np
-
-__all__ = [
-    "MFTrajectory",
-    "State",
-    "TrainingTrajectoryDataset",
-    "Trajectory",
-]
 
 
 def _validate_non_empty_array(
