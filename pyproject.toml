@@ -15,6 +15,8 @@ dependencies = [
     "scipy",
     "pysindy>=2.1",
     "torch",
+    "matplotlib",
+    "imageio"
 ]
 readme = "README.md"
 requires-python = ">=3.11"
@@ -43,3 +45,6 @@ package-dir = {"" = "src"}
 
 [tool.ruff]
 line-length = 80
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]

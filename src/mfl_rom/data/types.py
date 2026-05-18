@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Mapping
 
+# from typing import Mapping
 import numpy as np
 
 
@@ -23,11 +23,14 @@ class State:
         object.__setattr__(self, "values", values)
 
         if values.ndim < 1 or any(dim == 0 for dim in values.shape):
-            raise ValueError("values must be a non-empty NumPy array representing a single state snapshot.")
+            raise ValueError("values must be a non-empty NumPy array"
+                             "representing a single state snapshot.")
 
-        if self.channel_names is not None and len(self.channel_names) != values.shape[-1]:
+        if self.channel_names is not None and \
+            len(self.channel_names) != values.shape[-1]:
             raise ValueError(
-                "If provided, channel_names must describe the last axis of values "
+                "If provided, channel_names must describe "
+                "the last axis of values "
                 "and have length equal to values.shape[-1]."
             )
             
