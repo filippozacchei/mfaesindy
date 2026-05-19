@@ -5,6 +5,20 @@ from scipy.integrate import solve_ivp
 
 from mfl_rom.data import MFTrajectory, Trajectory
 
+# Benchmark summary:
+# - The latent dynamics are fixed; trajectory diversity comes from varying the
+#   initial condition rather than the ODE coefficients.
+# - The observation model is a scalar field lifting with a shared underlying HF
+#   field and an LF observation obtained on a coarser grid.
+# - LF discrepancy is modeled through a mild smooth bias and optional noise.
+#
+# Open design choices:
+# - Whether scalar trajectories should keep shape (n_t, nx, ny) or use an
+#   explicit singleton channel axis.
+# - Whether Trajectory.parameters should continue storing the latent initial
+#   condition for this benchmark.
+# - Whether the default LF noise level should be zero or mildly nonzero.
+
 HF_GRID_SHAPE = (64, 64)
 LF_GRID_SHAPE = (16, 16)
 LF_BIAS = 0.01
