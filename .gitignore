@@ -1,2 +1,13 @@
 *mfl_rom.egg-info*
 *.vscode*
+*blueprint*
+*__pycache__/*
+*.py[cod]
+.pytest_cache/
+
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+*artifacts/
+*outputs/
+*figures/
+
