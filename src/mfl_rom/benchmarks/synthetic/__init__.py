@@ -3,7 +3,7 @@ from .spiral_ode import (
     generate_mf_trajectory,
     generate_trajectory,
     latent_rhs,
-    sample_initial_condition,
+    sample_ic,
 )
 
 __all__ = [
@@ -11,5 +11,5 @@ __all__ = [
     "generate_mf_trajectory",
     "generate_trajectory",
     "latent_rhs",
-    "sample_initial_condition",
+    "sample_ic",
 ]

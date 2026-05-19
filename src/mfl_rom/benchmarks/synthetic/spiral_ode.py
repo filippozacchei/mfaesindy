@@ -21,8 +21,8 @@ from mfl_rom.data import MFTrajectory, Trajectory
 
 HF_GRID_SHAPE = (64, 64)
 LF_GRID_SHAPE = (16, 16)
-LF_BIAS = 0.01
-LF_NOISE_STD = 0.01
+LF_BIAS = 0.1
+LF_NOISE_STD = 0.1
 
 def latent_rhs(
     t: float,
