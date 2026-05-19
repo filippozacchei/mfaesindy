@@ -40,8 +40,11 @@ dev = [
 ]
 
 [tool.setuptools]
-packages = ["mfl_rom"]
 package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["mfl_rom*"]
 
 [tool.ruff]
 line-length = 80
