@@ -16,7 +16,8 @@ dependencies = [
     "pysindy>=2.1",
     "torch",
     "matplotlib",
-    "imageio"
+    "imageio",
+    "tqdm"
 ]
 readme = "README.md"
 requires-python = ">=3.11"
