@@ -19,7 +19,7 @@ from mfl_rom.data import MFTrajectory, Trajectory
 #   condition for this benchmark.
 # - Whether the default LF noise level should be zero or mildly nonzero.
 
-HF_GRID_SHAPE = (64, 64)
+HF_GRID_SHAPE = (32, 32)
 LF_GRID_SHAPE = (16, 16)
 LF_BIAS = 0.1
 LF_NOISE_STD = 0.1

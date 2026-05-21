@@ -136,6 +136,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 from torch.optim import Optimizer
+from torch.optim.lr_scheduler import LRScheduler
 from tqdm import tqdm
 
 from mfl_rom.data import MFTrajectory, TrainingTrajectoryDataset, Trajectory
@@ -801,6 +802,7 @@ def fit(
     rng: np.random.Generator | None = None,
     mf_target_steps: int | None = None,
     verbose: bool = True,
+    scheduler: LRScheduler | None = None,
     print_every: int = 1,
 ) -> list[dict[str, float]]:
     """
@@ -839,6 +841,11 @@ def fit(
             record.update(
                 {f"val_{key}": value for key, value in val_metrics.items()}
             )
+        
+        record["lr"] = optimizer.param_groups[0]["lr"]
+
+        if scheduler is not None:
+            scheduler.step()
 
         history.append(record)
 
