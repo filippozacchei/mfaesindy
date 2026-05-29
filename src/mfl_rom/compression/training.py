@@ -849,7 +849,11 @@ def fit(
 
         history.append(record)
 
-        if verbose and ((epoch + 1) % print_every == 0 or epoch == 0 or epoch + 1 == num_epochs):
+        if verbose and (
+            (epoch + 1) % print_every == 0
+            or epoch == 0
+            or epoch + 1 == num_epochs
+        ):
             summary_keys = [
                 key for key in record
                 if key != "epoch" and key.endswith("/loss")
